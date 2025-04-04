@@ -3,59 +3,51 @@ import axios from "axios";
 
 const Counteravailability = () => {
   const [counterdata, setCounterdata] = useState([]);
-  const [counter, setCounter] = useState({});
 
   // Function to fetch data from API
   const fetchData = () => {
-    axios
-      .get("http://localhost:9098/api/cp/all")
-      .then((response) => {
-        setCounterdata(response.data);
-      });
+    axios.get("http://localhost:9098/api/cp/all").then((response) => {
+      setCounterdata(response.data);
+    });
   };
 
-  // Fetch data on component mount
+  // Fetch data when the component mounts
   useEffect(() => {
     fetchData();
   }, []);
 
-  // Function to change counter status
-  const changeCounterStatus = (id) => {
-    axios.get(`http://localhost:9098/api/cp/findById/${id}`).then((response) => {
-      setCounter(response.data);
-      let status = "";
+  // Function to toggle the counter's status using local data
+  const changeCounterStatus = (id, currentStatus) => {
+    const newStatus = currentStatus === "Active" ? "Not Active" : "Active";
 
-      // Toggle status
-      if (response.data.status === "Active") {
-        status = "NotActive";
-      } else {
-        status = "Active";
-      }
-
-      console.log(status, response.data);
-
-      // Update status in the backend
-      axios
-        .put(`http://localhost:9098/api/cp/updateAvailability/${id}?status=${status}`)
-        .then((response) => {
-          window.alert(response.data);
-          fetchData();
-        });
-    });
+    console.log(`Changing status for id ${id} to ${newStatus}`);
+    
+    // Update status in the backend
+    axios
+      .put(`http://localhost:9098/api/cp/updateAvailability/${id}?status=${newStatus}`)
+      .then((response) => {
+        window.alert(response.data);
+        fetchData();
+      })
+      .catch((error) => {
+        console.error("Error updating status:", error);
+      });
   };
 
   return (
     <div>
-      
       <h1
         style={{
-          color: "blue",
+          color: "DodgerBlue",
           textAlign: "center",
           fontFamily: "sans-serif",
-          padding: "20px 0", 
+          padding: "20px 0",
+          fontFamily:"Times New Roman"
         }}
       >
+        <strong>
         Counter Availability
+        </strong>
       </h1>
       <table className="table table-bordered">
         <thead>
@@ -77,7 +69,9 @@ const Counteravailability = () => {
                       ? "btn btn-primary px-5 my-2 w-50"
                       : "btn btn-danger px-5 my-2 w-50"
                   }
-                  onClick={() => changeCounterStatus(element.id)}
+                  onClick={() =>
+                    changeCounterStatus(element.id, element.status)
+                  }
                 >
                   {element.status}
                 </button>
